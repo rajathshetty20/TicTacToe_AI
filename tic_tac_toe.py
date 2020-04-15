@@ -7,11 +7,10 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 
-kivy.require('1.11.1')
-
 from algo import Algo
 
 my_algo = Algo()
+AI_mode = False
 player_name = ['X','O']
 player_sign = ['X','O']
 
@@ -20,13 +19,13 @@ class Login(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.cols = 2
-        self.add_widget(Label(font_size = 40, text="TIC-TAC-TOE"))
+        self.add_widget(Label(font_size = 40, text="Tic Tac Toe"))
         self.add_widget(Label(text="---RS_Games", font_size=20))
-        self.add_widget(Label(text="Player_X:", font_size=20))
+        self.add_widget(Label(text="Player X:", font_size=20))
         self.player_x = TextInput(multiline=False, font_size=20)
         self.add_widget(self.player_x)
-        self.add_widget(Label(text="Player_O:", font_size=20))
-        self.player_o = TextInput(multiline=False, font_size=20)
+        self.add_widget(Label(text="Player O:", font_size=20))
+        self.player_o = TextInput(text="Computer", multiline=False, font_size=20)
         self.add_widget(self.player_o)
         self.add_widget(Label())
         self.start = Button(text="Start")
@@ -36,6 +35,9 @@ class Login(GridLayout):
     def start_game(self, button):
         player_name[0] = self.player_x.text
         player_name[1] = self.player_o.text
+        if player_name[1]=="Computer":
+            global AI_mode
+            AI_mode = True 
         my_app.game.message.text = "{} to play".format(player_name[my_app.game.current_player])
         my_app.screen_manager.current = "game"
 
@@ -44,13 +46,13 @@ class Game(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.cols = 3
-        self.b = []
+        self.buttons = []
         for x in range(0,9):
             button = Button(text='-', font_size=30)
             button.number = x
             button.bind(on_press=self.button_press)
             self.add_widget(button)
-            self.b.append(button)
+            self.buttons.append(button)
         self.message = Label(font_size=30)
         self.add_widget(self.message)
         self.play = True
@@ -86,14 +88,24 @@ class Game(GridLayout):
                     self.current_player = 0
                 self.message.text = "{} to play".format(player_name[self.current_player])
 
+        #AI decision
+        if AI_mode and self.play and self.current_player==1:
+            choice = my_algo.ai_choice()
+            self.button_press(self.buttons[choice])
+
     def restart(self, button):
         for x in range(0,9):
             my_algo.board[x] = '-'
-            for x in self.b:
+            for x in self.buttons:
                 x.text = '-'
                 self.message.text = "{} to play".format(player_name[self.current_player])
         self.remove_widget(self.replay)
         self.play = True
+
+        #AI decision when it has the first move
+        if AI_mode and self.play and self.current_player==1:
+            choice = my_algo.ai_choice()
+            self.button_press(self.buttons[choice])
 
 class MyApp(App):
     def build(self):

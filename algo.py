@@ -36,4 +36,61 @@ class Algo:
 				break
 		return draw
 
+	def minimax(self, isAI):
+		if self.check_win():
+			if isAI:
+				score = 1
+			else:
+				score = -1
+
+		elif self.check_draw():
+			score = 0
+		
+		else:
+			#The next move is for the player. The player will minimize the score
+			if isAI:
+				bestScore = 1000
+				bestMove = -1
+				for x in range(0,9):
+					if self.board[x]=="-":
+						self.board[x] = 'X'
+						moveScore = self.minimax(False)
+						self.board[x] = '-'
+
+						if moveScore<bestScore:
+							bestScore = moveScore
+							bestMove = x
+						
+				score = bestScore
+
+			#The next move is for the computer. The computer will maximize the score
+			else:
+				bestScore = -1000
+				bestMove = -1
+				for x in range(0,9):
+					if self.board[x]=="-":
+						self.board[x] = 'O'
+						moveScore = self.minimax(True)
+						self.board[x] = '-'
+
+						if moveScore>bestScore:
+							bestScore = moveScore
+							bestMove = x
+				score =  bestScore
+		return score
+
+	def ai_choice(self):
+		bestScore = -1000
+		bestMove = -1
+		for x in range(0,9):
+			if self.board[x]=="-":
+				self.board[x] = 'O'
+				moveScore = self.minimax(True)
+				self.board[x] = '-'
+
+				if moveScore>bestScore:
+					bestScore = moveScore
+					bestMove = x
+		return bestMove
+
 
